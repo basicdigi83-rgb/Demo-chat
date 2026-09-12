@@ -1,6 +1,6 @@
 {
   "name": "booking-demo",
   "version": "1.0.0",
-  "private": true,
+  "private": true, "type": "module",
   "description": "AI booking assistant demo for clinics, dental practices, and salons — chat backed by Gemini, bookings sent to an n8n webhook."
 }
