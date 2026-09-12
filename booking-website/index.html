@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Booking Assistant — Live Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F1EEE6;
+    --ink:#1E2B27;
+    --ink-soft:#5B6B65;
+    --white:#FFFFFF;
+    --line:#DCD6C8;
+    --accent:#2F6B5E;
+    --accent-soft:#E7EFEC;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Public Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:1100px;
+    margin:0 auto;
+    padding:48px 24px 64px;
+  }
+  .top{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    gap:16px;
+    margin-bottom:40px;
+    flex-wrap:wrap;
+  }
+  .brandmark{
+    font-family:'Fraunces', serif;
+    font-size:19px;
+    font-weight:500;
+    letter-spacing:-0.01em;
+  }
+  .brandmark span{ color: var(--accent); }
+  .badge{
+    font-size:13px;
+    color:var(--ink-soft);
+    border:1px solid var(--line);
+    padding:5px 12px;
+    border-radius:100px;
+    background:var(--white);
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:1.05fr 0.95fr;
+    gap:56px;
+    align-items:start;
+  }
+  @media (max-width:860px){
+    .grid{ grid-template-columns:1fr; }
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-size:clamp(32px,4vw,44px);
+    line-height:1.08;
+    font-weight:500;
+    letter-spacing:-0.01em;
+    margin:0 0 18px;
+    max-width:19ch;
+    transition:color .25s ease;
+  }
+  .sub{
+    font-size:16.5px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    max-width:44ch;
+    margin:0 0 32px;
+  }
+  .toggle-row{ margin-bottom:28px; }
+  .toggle-label{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .pills{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .pill{
+    font-family:'Public Sans', sans-serif;
+    font-size:14.5px;
+    font-weight:600;
+    padding:9px 18px;
+    border-radius:100px;
+    border:1px solid var(--line);
+    background:var(--white);
+    color:var(--ink);
+    cursor:pointer;
+    transition:all .18s ease;
+  }
+  .pill.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:var(--white);
+  }
+  .field{
+    margin-bottom:30px;
+  }
+  .field label{
+    display:block;
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .field input{
+    width:100%;
+    max-width:360px;
+    font-family:'Public Sans', sans-serif;
+    font-size:15px;
+    padding:11px 14px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--white);
+    color:var(--ink);
+  }
+  .field input:focus{
+    outline:none;
+    border-color:var(--accent);
+  }
+  .points{
+    list-style:none;
+    padding:0;
+    margin:0 0 8px;
+    display:flex;
+    flex-direction:column;
+    gap:13px;
+  }
+  .points li{
+    display:flex;
+    gap:12px;
+    font-size:14.5px;
+    line-height:1.55;
+    color:var(--ink);
+    max-width:42ch;
+  }
+  .points li .dot{
+    flex:none;
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--accent);
+    margin-top:8px;
+    transition:background .25s ease;
+  }
+  /* Phone / chat panel */
+  .phone{
+    background:var(--white);
+    border-radius:22px;
+    border:1px solid var(--line);
+    box-shadow:0 20px 50px -20px rgba(30,43,39,0.18);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    height:620px;
+  }
+  .phone-head{
+    background:var(--accent);
+    color:var(--white);
+    padding:18px 20px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    transition:background .25s ease;
+  }
+  .avatar{
+    width:38px;height:38px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.2);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Fraunces', serif;
+    font-size:16px;
+    flex:none;
+  }
+  .phone-head .name{
+    font-weight:600;
+    font-size:15px;
+    line-height:1.2;
+  }
+  .phone-head .status{
+    font-size:12px;
+    opacity:0.85;
+  }
+  .messages{
+    flex:1;
+    overflow-y:auto;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    background:#FAF9F5;
+  }
+  .msg{
+    max-width:82%;
+    padding:10px 14px;
+    border-radius:14px;
+    font-size:14.5px;
+    line-height:1.5;
+    white-space:pre-wrap;
+  }
+  .msg.bot{
+    background:var(--white);
+    border:1px solid var(--line);
+    align-self:flex-start;
+    border-bottom-left-radius:4px;
+  }
+  .msg.user{
+    background:var(--accent);
+    color:var(--white);
+    align-self:flex-end;
+    border-bottom-right-radius:4px;
+    transition:background .25s ease;
+  }
+  .msg.system{
+    align-self:center;
+    background:var(--accent-soft);
+    color:var(--accent);
+    font-size:12.5px;
+    font-weight:600;
+    padding:6px 14px;
+    border-radius:100px;
+    max-width:90%;
+    text-align:center;
+  }
+  .typing{
+    align-self:flex-start;
+    display:flex;
+    gap:4px;
+    padding:12px 16px;
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:14px;
+    border-bottom-left-radius:4px;
+  }
+  .typing span{
+    width:6px;height:6px;
+    border-radius:50%;
+    background:var(--ink-soft);
+    opacity:0.4;
+    animation:blink 1.2s infinite;
+  }
+  .typing span:nth-child(2){ animation-delay:.2s; }
+  .typing span:nth-child(3){ animation-delay:.4s; }
+  @keyframes blink{ 0%,80%,100%{opacity:.25;} 40%{opacity:.9;} }
+  .composer{
+    display:flex;
+    gap:8px;
+    padding:14px;
+    border-top:1px solid var(--line);
+    background:var(--white);
+  }
+  .composer input{
+    flex:1;
+    font-family:'Public Sans', sans-serif;
+    font-size:14.5px;
+    padding:11px 14px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--bg);
+    color:var(--ink);
+  }
+  .composer input:focus{ outline:none; border-color:var(--accent); }
+  .composer button{
+    font-family:'Public Sans', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    border:none;
+    background:var(--accent);
+    color:var(--white);
+    padding:0 20px;
+    border-radius:10px;
+    cursor:pointer;
+    transition:background .25s ease, opacity .15s ease;
+  }
+  .composer button:disabled{ opacity:0.5; cursor:default; }
+  .reset{
+    text-align:center;
+    padding-top:10px;
+  }
+  .reset button{
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    font-size:12.5px;
+    text-decoration:underline;
+    cursor:pointer;
+    font-family:'Public Sans', sans-serif;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brandmark">Live demo — <span id="brandType">Clinic</span> booking assistant</div>
+    <div class="badge">Built with N8N + AI · works on WhatsApp or your website</div>
+  </div>
+
+  <div class="grid">
+    <div>
+      <div class="toggle-row">
+        <div class="toggle-label">Show this demo as a</div>
+        <div class="pills" id="pills">
+          <button class="pill active" data-type="clinic">Clinic</button>
+          <button class="pill" data-type="dental">Dental practice</button>
+          <button class="pill" data-type="salon">Salon</button>
+        </div>
+      </div>
+
+      <h1 id="headline">Stop losing patients to missed calls.</h1>
+      <p class="sub" id="subhead">Every unanswered WhatsApp message is a booking walking to your competitor. This assistant answers instantly, day or night, and puts the appointment straight on your schedule.</p>
+
+      <div class="field">
+        <label for="bizName">Business name (try typing a real one)</label>
+        <input id="bizName" type="text" placeholder="e.g. Al-Shifa Dental Care" maxlength="40">
+      </div>
+
+      <ul class="points" id="points">
+        <li><span class="dot"></span>Answers common questions instantly — services, prices, timings, location</li>
+        <li><span class="dot"></span>Books and confirms appointments without staff lifting a finger</li>
+        <li><span class="dot"></span>Sends automatic reminders the day before, so fewer people miss their slot</li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="phone-head">
+          <div class="avatar" id="avatarInitial">C</div>
+          <div>
+            <div class="name" id="phoneName">Clinic — WhatsApp</div>
+            <div class="status">Usually replies instantly</div>
+          </div>
+        </div>
+        <div class="messages" id="messages"></div>
+        <div class="composer">
+          <input id="userInput" type="text" placeholder="Type a message, like a real patient or client would…">
+          <button id="sendBtn">Send</button>
+        </div>
+      </div>
+      <div class="reset"><button id="resetBtn">Reset conversation</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// IMPORTANT: replace this with your real production n8n webhook URL
+const N8N_WEBHOOK_URL = 'https://basicdigi.app.n8n.cloud/webhook/new-booking';
+
+const config = {
+  clinic: {
+    label: 'Clinic',
+    headline: 'Stop losing patients to missed calls.',
+    sub: 'Every unanswered WhatsApp message is a booking walking to your competitor. This assistant answers instantly, day or night, and puts the appointment straight on your schedule.',
+    points: [
+      'Answers common questions instantly — services, prices, timings, location',
+      'Books and confirms appointments without staff lifting a finger',
+      'Sends automatic reminders the day before, so fewer people miss their slot'
+    ],
+    accent: '#2F6B5E',
+    accentSoft: '#E7EFEC',
+    initial: 'C',
+    chatName: 'Clinic — WhatsApp',
+    defaultBiz: 'Your Clinic',
+    systemPrompt: (biz) => `You are the WhatsApp booking assistant for "${biz}", a general medical clinic in Islamabad, Pakistan. You are warm, brief, and professional — reply like a real WhatsApp message, 1-3 short sentences, no long paragraphs, no markdown formatting.
+Clinic details you can use: General Physician + Pediatrics + Dermatology available. Hours: Mon-Sat 10am-8pm, closed Sunday. Location: Islamabad (assume a plausible sector if asked, e.g. F-8). Consultation fee: Rs. 2,000-3,000 depending on specialist.
+Your job: answer questions naturally, and guide the conversation to collect a booking — patient name, phone number, which doctor/service, and preferred date & time. Ask for missing details one at a time, don't interrogate. Once you have all the booking details, confirm it back clearly in one message starting with "Got it — here's your booking:" followed by the details on their own lines, and tell them the clinic will confirm shortly.
+After that confirmation sentence, on its own new line, output exactly this hidden data tag (the user will not see this, it is stripped before display — always include it the moment you have all four booking details, never before): <<<BOOKING_DATA:{"name":"<patient name>","phone":"<phone number>","service":"<doctor/service>","datetime":"<preferred date and time>","business_type":"Clinic"}>>>
+Stay in character as the clinic's assistant at all times.`
+  },
+  dental: {
+    label: 'Dental practice',
+    headline: 'Every missed message is a patient in someone else\'s chair.',
+    sub: 'Dental patients rarely call twice. This assistant replies the second they message, answers pricing and availability questions, and locks in the appointment automatically.',
+    points: [
+      'Answers questions on treatments, pricing, and availability instantly',
+      'Books consultations and cleanings directly into your schedule',
+      'Sends a reminder before each visit to cut down on no-shows'
+    ],
+    accent: '#3B6E8F',
+    accentSoft: '#E8EFF3',
+    initial: 'D',
+    chatName: 'Dental Practice — WhatsApp',
+    defaultBiz: 'Your Dental Practice',
+    systemPrompt: (biz) => `You are the WhatsApp booking assistant for "${biz}", a dental practice in Islamabad, Pakistan. You are warm, brief, and professional — reply like a real WhatsApp message, 1-3 short sentences, no long paragraphs, no markdown formatting.
+Practice details you can use: Services include check-ups, cleaning, fillings, root canal, braces/orthodontics, whitening. Hours: Mon-Sat 11am-8pm, closed Sunday. Location: Islamabad (assume a plausible sector if asked, e.g. F-10). Consultation fee: Rs. 2,500, cleaning from Rs. 4,000.
+Your job: answer questions naturally, and guide the conversation to collect a booking — patient name, phone number, which treatment, and preferred date & time. Ask for missing details one at a time, don't interrogate. Once you have all the booking details, confirm it back clearly in one message starting with "Got it — here's your booking:" followed by the details on their own lines, and tell them the practice will confirm shortly.
+After that confirmation sentence, on its own new line, output exactly this hidden data tag (the user will not see this, it is stripped before display — always include it the moment you have all four booking details, never before): <<<BOOKING_DATA:{"name":"<patient name>","phone":"<phone number>","service":"<treatment>","datetime":"<preferred date and time>","business_type":"Dental"}>>>
+Stay in character as the practice's assistant at all times.`
+  },
+  salon: {
+    label: 'Salon',
+    headline: 'A fully booked chair beats a missed DM.',
+    sub: 'Clients message when they think of it — often outside working hours. This assistant answers instantly, shares pricing, and gets the appointment on the books before they message someone else.',
+    points: [
+      'Answers pricing and availability questions instantly, any time of day',
+      'Books appointments directly into your schedule, no back-and-forth',
+      'Sends a reminder before each appointment, so fewer clients no-show'
+    ],
+    accent: '#B15C4C',
+    accentSoft: '#F5E9E5',
+    initial: 'S',
+    chatName: 'Salon — WhatsApp',
+    defaultBiz: 'Your Salon',
+    systemPrompt: (biz) => `You are the WhatsApp booking assistant for "${biz}", a beauty salon in Islamabad, Pakistan. You are warm, brief, and friendly — reply like a real WhatsApp message, 1-3 short sentences, no long paragraphs, no markdown formatting.
+Salon details you can use: Services include haircut/styling, hair color, facial, manicure/pedicure, bridal makeup. Hours: Tue-Sun 11am-8pm, closed Monday. Location: Islamabad (assume a plausible sector if asked, e.g. F-7). Prices: haircut from Rs. 1,500, facial from Rs. 3,000, bridal packages from Rs. 25,000.
+Your job: answer questions naturally, and guide the conversation to collect a booking — client name, phone number, which service, and preferred date & time. Ask for missing details one at a time, don't interrogate. Once you have all the booking details, confirm it back clearly in one message starting with "Got it — here's your booking:" followed by the details on their own lines, and tell them the salon will confirm shortly.
+After that confirmation sentence, on its own new line, output exactly this hidden data tag (the user will not see this, it is stripped before display — always include it the moment you have all four booking details, never before): <<<BOOKING_DATA:{"name":"<client name>","phone":"<phone number>","service":"<service>","datetime":"<preferred date and time>","business_type":"Salon"}>>>
+Stay in character as the salon's assistant at all times.`
+  }
+};
+
+let currentType = 'clinic';
+let history = [];
+let bizName = '';
+
+const els = {
+  pills: document.getElementById('pills'),
+  headline: document.getElementById('headline'),
+  subhead: document.getElementById('subhead'),
+  points: document.getElementById('points'),
+  bizName: document.getElementById('bizName'),
+  avatarInitial: document.getElementById('avatarInitial'),
+  phoneName: document.getElementById('phoneName'),
+  brandType: document.getElementById('brandType'),
+  messages: document.getElementById('messages'),
+  userInput: document.getElementById('userInput'),
+  sendBtn: document.getElementById('sendBtn'),
+  resetBtn: document.getElementById('resetBtn'),
+  root: document.documentElement
+};
+
+function applyType(type, opts = {}){
+  currentType = type;
+  const c = config[type];
+  document.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.type === type));
+  els.headline.textContent = c.headline;
+  els.subhead.textContent = c.sub;
+  els.points.innerHTML = c.points.map(p => `<li><span class="dot"></span>${p}</li>`).join('');
+  els.avatarInitial.textContent = c.initial;
+  els.brandType.textContent = c.label;
+  document.documentElement.style.setProperty('--accent', c.accent);
+  document.documentElement.style.setProperty('--accent-soft', c.accentSoft);
+  if(!opts.keepBizName){
+    els.bizName.value = '';
+    bizName = c.defaultBiz;
+  }
+  els.phoneName.textContent = (bizName || c.defaultBiz) + ' — WhatsApp';
+  if(!opts.keepHistory){
+    resetConversation();
+  }
+}
+
+function resetConversation(){
+  history = [];
+  els.messages.innerHTML = '';
+  const c = config[currentType];
+  const greeting = {
+    clinic: `Assalam-o-Alaikum! Welcome to ${bizName || c.defaultBiz}. How can I help you today — booking, or a quick question?`,
+    dental: `Assalam-o-Alaikum! Welcome to ${bizName || c.defaultBiz}. How can I help — would you like to book a visit or ask something first?`,
+    salon: `Hi there! Welcome to ${bizName || c.defaultBiz} 💫 Would you like to book an appointment or check prices first?`
+  }[currentType];
+  addMessage('bot', greeting);
+  history.push({ role: 'assistant', content: greeting });
+}
+
+function addMessage(role, text){
+  const div = document.createElement('div');
+  div.className = 'msg ' + (role === 'user' ? 'user' : (role === 'system' ? 'system' : 'bot'));
+  div.textContent = text;
+  els.messages.appendChild(div);
+  els.messages.scrollTop = els.messages.scrollHeight;
+}
+
+function showTyping(){
+  const div = document.createElement('div');
+  div.className = 'typing';
+  div.id = 'typingIndicator';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  els.messages.appendChild(div);
+  els.messages.scrollTop = els.messages.scrollHeight;
+}
+function hideTyping(){
+  const el = document.getElementById('typingIndicator');
+  if(el) el.remove();
+}
+
+async function sendBookingToN8N(bookingData){
+  try{
+    await fetch(N8N_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bookingData)
+    });
+    addMessage('system', '✅ Sent to the business');
+  }catch(err){
+    console.error('Failed to send booking to n8n:', err);
+    addMessage('system', '⚠️ Could not reach booking system — please try again');
+  }
+}
+
+async function sendMessage(){
+  const text = els.userInput.value.trim();
+  if(!text) return;
+  els.userInput.value = '';
+  els.sendBtn.disabled = true;
+  addMessage('user', text);
+  history.push({ role: 'user', content: text });
+  showTyping();
+
+  try{
+    const c = config[currentType];
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        system: c.systemPrompt(bizName || c.defaultBiz),
+        messages: history
+      })
+    });
+    const data = await response.json();
+    hideTyping();
+    let reply = data.reply || "Sorry, could you say that again?";
+
+    const bookingMatch = reply.match(/<<<BOOKING_DATA:(\{.*?\})>>>/s);
+    let bookingData = null;
+    if(bookingMatch){
+      reply = reply.replace(bookingMatch[0], '').trim();
+      try{
+        bookingData = JSON.parse(bookingMatch[1]);
+      }catch(parseErr){
+        console.error('Could not parse booking data:', parseErr);
+      }
+    }
+
+    addMessage('bot', reply);
+    history.push({ role: 'assistant', content: reply });
+
+    if(bookingData){
+      sendBookingToN8N(bookingData);
+    }
+  }catch(err){
+    hideTyping();
+    addMessage('bot', "Sorry, something went wrong on our end — please try again in a moment.");
+    console.error(err);
+  }finally{
+    els.sendBtn.disabled = false;
+    els.userInput.focus();
+  }
+}
+
+els.pills.addEventListener('click', (e) => {
+  const btn = e.target.closest('.pill');
+  if(!btn) return;
+  applyType(btn.dataset.type);
+});
+
+els.bizName.addEventListener('input', () => {
+  bizName = els.bizName.value.trim();
+  const c = config[currentType];
+  els.phoneName.textContent = (bizName || c.defaultBiz) + ' — WhatsApp';
+});
+
+els.bizName.addEventListener('change', () => {
+  resetConversation();
+});
+
+els.sendBtn.addEventListener('click', sendMessage);
+els.userInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') sendMessage(); });
+els.resetBtn.addEventListener('click', resetConversation);
+
+applyType('clinic');
+</script>
+</body>
+</html>
