@@ -27,7 +27,7 @@ export default async function handler(req, res) {
       parts: [{ text: m.content }]
     }));
 
-    const model = "gemini-3.8-flash",; // change here if you want a different Gemini model
+    const model = 'gemini-3.8-flash'; // change here if you want a different Gemini model
 
     const geminiResponse = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
